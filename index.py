@@ -1,18 +1,28 @@
-from flask import Flask, render_template, redirect, flash
+import os
+from flask_migrate import Migrate, MigrateCommand
+from app import create_app, db
+from app.models import User, Role
+from flask_script import Manager, Shell
 
-from conf import flaskConf
-from pkg.forms import LoginForm
+app = create_app(os.getenv('FLASK_CONFIG') or 'default')
+migrate = Migrate(app, db)
+manager = Manager(app)
 
-app = Flask(__name__)
-app.config.from_object(flaskConf)
 
-@app.route('/login', methods = ['GET', 'POST'])
-def login():
-    form = LoginForm()
-    if form.validate_on_submit():
-        flash('Login requested for OpenID="' + form.openid.data + '", remember_me=' + str(form.remember_me.data))
-        return redirect('/index')
-    return render_template('login.html', title='Sign In', form=form, providers=app.config['OPENID_PROVIDERS'])
+@app.shell_context_processor
+def make_shell_context():
+    return dict(db=db, User=User, Role=Role)
+
+manager.add_command("shell", Shell(make_context=make_shell_context))
+manager.add_command("db", MigrateCommand)
+
+
+@app.cli.command()
+def test():
+    """Run the unit tests."""
+    import unittest
+    tests = unittest.TestLoader().discover('tests')
+    unittest.TextTestRunner(verbosity=2).run(tests)
 
 if __name__ == '__main__':
-    app.run()
+    manager.run()
