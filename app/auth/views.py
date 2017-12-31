@@ -7,6 +7,14 @@ from ..models import User
 from ..email import send_email
 from .forms import LoginForm, RegistrationForm
 
+@auth.before_app_request
+def before_request():
+    if current_user.is_authenticated \
+            and not current_user.confirmed \
+            and request.endpoint \
+            and request.blueprint != 'auth' \
+            and request.endpoint != 'static':
+        return redirect(url_for('auth.unconfirmed'))
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -22,14 +30,12 @@ def login():
         flash('Invalid username or password.')
     return render_template('auth/login.html', form=form)
 
-
 @auth.route('/logout')
 @login_required
 def logout():
     logout_user()
     flash('You have been logged out.')
     return redirect(url_for('main.index'))
-
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
@@ -40,6 +46,20 @@ def register():
                     password=form.password.data)
         db.session.add(user)
         db.session.commit()
-        flash('You can now login.')
+        token = user.generate_confirmation_token()
+        send_email(user.email, 'Confirm Your Account',
+                   'auth/email/confirm', user=user, token=token)
+        flash('A confirmation email has been sent to you by email.')
         return redirect(url_for('auth.login'))
     return render_template('auth/register.html', form=form)
+
+
+@auth.route('/confirm')
+@login_required
+def resend_confirmation():
+    token = current_user.generate_confirmation_token()
+    send_email(current_user.email, 'Confirm Your Account',
+               'auth/email/confirm', user=current_user, token=token)
+    flash('A new confirmation email has been sent to you by email.')
+    return redirect(url_for('main.index'))
+
