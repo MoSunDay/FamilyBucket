@@ -83,7 +83,7 @@ def unconfirmed():
         return redirect(url_for('main.index'))
     return render_template('auth/unconfirmed.html')
 
-@auth.route('/change_password', methods=['GET', 'POST'])
+@auth.route('/change-password', methods=['GET', 'POST'])
 @login_required
 def change_password():
     form = ChangePasswordForm()
@@ -131,7 +131,7 @@ def password_reset(token):
             return redirect(url_for('main.index'))
     return render_template('auth/reset_password.html', form=form)
 
-@auth.route('/change_email', methods=['GET', 'POST'])
+@auth.route('/change-mail', methods=['GET', 'POST'])
 @login_required
 def change_email_request():
     form = ChangeEmailForm()
@@ -149,7 +149,7 @@ def change_email_request():
             flash('Invalid email or password.')
     return render_template("auth/change_email.html", form=form)
 
-@auth.route('/change_email/<token>')
+@auth.route('/change-email/<token>')
 @login_required
 def change_email(token):
     if current_user.change_email(token):
