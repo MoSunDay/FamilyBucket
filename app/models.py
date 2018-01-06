@@ -63,10 +63,6 @@ class Role(db.Model):
     def has_permission(self, perm):
         return self.permissions & perm == perm
 
-    def ping(self):
-        self.last_seen = datetime.utcnow()
-        db.session.add(self)
-
     def __repr__(self):
         return '<Role %r>' % self.name
 
@@ -84,6 +80,14 @@ class User(UserMixin, db.Model):
     about_me = db.Column(db.Text())
     member_since = db.Column(db.DateTime(), default=datetime.utcnow)
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
+
+    def __init__(self, **kwargs):
+        super(User, self).__init__(**kwargs)
+        if self.role is None:
+            if self.email == current_app.config['MINI_ADMIN']:
+                self.role = Role.query.filter_by(name='Administrator').first()
+            if self.role is None:
+                self.role = Role.query.filter_by(default=True).first()
 
     @property
     def password(self):
@@ -130,6 +134,11 @@ class User(UserMixin, db.Model):
         db.session.add(user)
         return True
 
+    def generate_email_change_token(self, new_email, expiration=3600):
+        s = Serializer(current_app.config['SECRET_KEY'], expiration)
+        return s.dumps(
+            {'change_email': self.id, 'new_email': new_email}).decode('utf-8')
+
     def change_email(self, token):
         s = Serializer(current_app.config['SECRET_KEY'])
         try:
@@ -146,11 +155,6 @@ class User(UserMixin, db.Model):
         self.email = new_email
         db.session.add(self)
         return True
-
-    def generate_email_change_token(self, new_email, expiration=3600):
-        s = Serializer(current_app.config['SECRET_KEY'], expiration)
-        return s.dumps(
-            {'change_email': self.id, 'new_email': new_email}).decode('utf-8')
 
     def can(self, perm):
         return self.role is not None and self.role.has_permission(perm)
