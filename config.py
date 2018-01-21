@@ -2,7 +2,7 @@ import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
-class Config:
+class Config(object):
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess string'
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.qq.com')
     MAIL_PORT = int(os.environ.get('MAIL_PORT', '465'))
@@ -14,6 +14,7 @@ class Config:
     MINI_MAIL_SENDER = MAIL_USERNAME
     MINI_ADMIN = os.environ.get('MINI_ADMIN')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    MINI_POSTS_PER_PAGE = 20
 
     @staticmethod
     def init_app(app):
@@ -41,6 +42,5 @@ config = {
     'development': DevelopmentConfig,
     'testing': TestingConfig,
     'production': ProductionConfig,
-
     'default': DevelopmentConfig
 }
