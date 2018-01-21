@@ -25,3 +25,9 @@ def test():
 
 if __name__ == '__main__':
     manager.run()
+    # to create test data
+    '''
+    python index.py shell
+    >>> User.generate_fake(1000)
+    >>> Post.generate_fake(1000)
+    '''
