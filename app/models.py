@@ -5,6 +5,8 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
 from flask_login import UserMixin, AnonymousUserMixin
 from . import db, login_manager
+from markdown import markdown
+import bleach
 
 
 class Permission:
@@ -241,3 +243,14 @@ class Post(db.Model):
                      author=u)
             db.session.add(p)
             db.session.commit()
+
+    @staticmethod
+    def on_changed_body(target, value, oldvalue, initiator):
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
+                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
+                        'h1', 'h2', 'h3', 'p']
+        target.body_html = bleach.linkify(bleach.clean(
+            markdown(value, output_format='html'),
+            tags=allowed_tags, strip=True))
+
+db.event.listen(Post.body, 'set', Post.on_changed_body)
