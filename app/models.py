@@ -228,6 +228,7 @@ class Post(db.Model):
     body = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    body_html = db.Column(db.Text)
 
     @staticmethod
     def generate_fake(count=100):
@@ -240,7 +241,8 @@ class Post(db.Model):
             u = User.query.offset(randint(0, user_count - 1)).first()
             p = Post(body=forgery_py.lorem_ipsum.sentences(randint(1,3)),
                      timestamp=forgery_py.date.date(True),
-                     author=u)
+                     author=u,
+                     body_html="test data")
             db.session.add(p)
             db.session.commit()
 
