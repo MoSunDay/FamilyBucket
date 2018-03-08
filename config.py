@@ -15,6 +15,7 @@ class Config(object):
     MINI_ADMIN = os.environ.get('MINI_ADMIN')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MINI_POSTS_PER_PAGE = 20
+    MINI_FOLLOWERS_PER_PAGE = 50
 
     @staticmethod
     def init_app(app):
