@@ -28,6 +28,7 @@ if __name__ == '__main__':
     # to create test data
     '''
     python index.py shell
-    >>> User.generate_fake(1000)
-    >>> Post.generate_fake(1000)
+    >>> Role.insert_roles()   ->  init db need run
+    >>> User.generate_fake()
+    >>> Post.generate_fake()
     '''

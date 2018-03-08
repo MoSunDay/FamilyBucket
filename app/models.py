@@ -212,6 +212,7 @@ class User(UserMixin, db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+
 class AnonymousUser(AnonymousUserMixin):
     def can(self, permissions):
         return False
@@ -242,7 +243,7 @@ class Post(db.Model):
             p = Post(body=forgery_py.lorem_ipsum.sentences(randint(1,3)),
                      timestamp=forgery_py.date.date(True),
                      author=u,
-                     body_html="test data")
+                     body_html=forgery_py.lorem_ipsum.sentences(randint(1,3)))
             db.session.add(p)
             db.session.commit()
 
